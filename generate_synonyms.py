@@ -1,6 +1,7 @@
 import ollama
 import regex as re
 from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 class SynonymGenerator:
     """
@@ -14,7 +15,7 @@ class SynonymGenerator:
         """Initializes the SynonymGenerator with an Ollama engine instance."""
         self.ollama = ollama
 
-    def generate_synonyms(self, word, model, num_synonyms):
+    def generate_synonyms(self, word: str, model: str, num_synonyms: int):
         """
         Generates a list of synonyms for a given word using a specified model.
         
@@ -26,20 +27,17 @@ class SynonymGenerator:
         Returns:
             str: A raw string response containing synonyms in a list format.
         """
-        # Construct the prompt to be sent to the Ollama service
+        # Construct the prompt to be sent to the Ollama engine
         prompt = f"generate {num_synonyms} synonyms for {word} in Arabic in list format without providing the meaning. for example: [synonym1, synonym2, synonym3] I need the results as list format only."
-        response = self.ollama.chat(model=model, messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ])
+        system_prompt = "You are a python tool that generates synonyms for Arabic words. You need to generate synonyms for a given word in Arabic without providing the meaning. You need to generate a list of synonyms in list format. For example: [synonym1, synonym2, synonym3]. another example: [سعيد, مبتهج, فرحان] I need the only in this format."
+        response = self.ollama.generate(model=model, prompt=prompt, system=system_prompt)
         # Extract the content from the Ollama response
-        synonyms = response['message']['content']
+        synonyms = response['response']
+        print("Response:", synonyms)
 
         return synonyms
 
-    def best_synonyms(self, word, model, num_synonyms, similarity_threshold):
+    def best_synonyms(self, word: str, model: str, embedding_model:str, num_synonyms: int , similarity_threshold: float):
         """
         Filters the generated synonyms based on a cosine similarity threshold.
         
@@ -69,11 +67,22 @@ class SynonymGenerator:
             synonyms_list.remove(word)
 
         # Generate embeddings for the original word and each synonym
-        original_word_embedding = self.ollama.embeddings(model=model, prompt=word)
-        synonyms_embed_list = [self.ollama.embeddings(model=model, prompt=synonym) for synonym in synonyms_list]
+        original_word_embedding = self.ollama.embeddings(model=embedding_model, prompt=word)
+        synonyms_embed_list = [self.ollama.embeddings(model=embedding_model, prompt=synonym) for synonym in synonyms_list]
+
+        # Reshape the embeddings to be used in cosine similarity calculation
+        original_word_embedding_reshaped = np.array(original_word_embedding['embedding']).reshape(1, -1)
+        synonyms_embed_list_reshaped  = []
+        for synonym_embedding in synonyms_embed_list:
+            synonym_embedding = np.array(synonym_embedding['embedding']).reshape(1, -1)
+            synonyms_embed_list_reshaped.append(synonym_embedding)
 
         # Calculate cosine similarity and filter synonyms
-        similarity_scores = [cosine_similarity([original_word_embedding['embedding']], [synonym_embed['embedding']])[0][0] for synonym_embed in synonyms_embed_list]
-        best_synonyms = [synonyms_list[i] for i in range(len(synonyms_list)) if similarity_scores[i] >= similarity_threshold]
+        similarity_scores = []
+        for synonym_embedding in synonyms_embed_list_reshaped:
+            similarity_score = cosine_similarity(original_word_embedding_reshaped, synonym_embedding)[0][0]
+            print("Similarity score:", similarity_score)
+            similarity_scores.append(similarity_score)
+        best_synonyms = [synonyms_list[i] for i, score in enumerate(similarity_scores) if score >= similarity_threshold]
 
         return best_synonyms

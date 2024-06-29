@@ -40,6 +40,7 @@ Pull the desired model from the Ollama library. Visit the [Ollama Library](https
 
 ```bash
 ollama pull aya  # Replace 'aya' with any other model you might want to use
+ollama pull llama3
 ```
 
 ## Usage
@@ -47,7 +48,7 @@ ollama pull aya  # Replace 'aya' with any other model you might want to use
 To use the Synonym Generator tool, you can run the script with the desired parameters:
 
 ```bash
-python3 run.py --word "your arabic word" --model "aya" --num_synonyms 10 --similarity_threshold 0.9
+python3 run.py --word "your arabic word" --model "aya" --embedding_model "llama3" --num_synonyms 10 --similarity_threshold 0.8
 ```
 
 Replace `"your arabic word"` with the Arabic word you want synonyms for.

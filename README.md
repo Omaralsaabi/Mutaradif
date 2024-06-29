@@ -1,6 +1,6 @@
 # Synonym Generator Tool
 
-The Synonym Generator is a Python tool designed to generate and refine synonyms for Arabic words using the Ollama Engine. It allows users to specify a word, model, number of synonyms, and a similarity threshold to retrieve the most relevant synonyms based on cosine similarity.
+The Synonym Generator is a Python tool designed to generate and refine synonyms for Arabic words using the Ollama Engine and LLMs. It allows users to specify a word, model, number of synonyms, and a similarity threshold to retrieve the most relevant synonyms based on cosine similarity.
 
 ## Features
 

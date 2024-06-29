@@ -6,7 +6,7 @@ The Synonym Generator is a Python tool designed to generate and refine synonyms 
 
 - Generate synonyms for Arabic words.
 - Refine synonyms based on cosine similarity.
-- Use the Ollama AI model for accurate and relevant results.
+- Use the Ollama engine model for accurate and relevant results.
 
 ## Installation
 
@@ -34,9 +34,9 @@ Install the required Python packages:
 pip install -r requirements.txt
 ```
 
-### Ollama Model Setup
+### Ollama Engine Setup
 
-Pull the desired model from the Ollama library:
+Pull the desired model from the Ollama library. Visit the [Ollama Library](https://ollama.com/library) to see available models and further details:
 
 ```bash
 ollama pull aya  # Replace 'aya' with any other model you might want to use

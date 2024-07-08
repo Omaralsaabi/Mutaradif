@@ -2,6 +2,7 @@ import ollama
 import regex as re
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+from polyglot.detect import Detector
 
 class SynonymGenerator:
     """
@@ -27,15 +28,35 @@ class SynonymGenerator:
         Returns:
             str: A raw string response containing synonyms in a list format.
         """
-        # Construct the prompt to be sent to the Ollama engine
-        prompt = f"generate {num_synonyms} synonyms for {word} in Arabic in list format without providing the meaning. for example: [synonym1, synonym2, synonym3] I need the results as list format only."
-        system_prompt = "You are a python tool that generates synonyms for Arabic words. You need to generate synonyms for a given word in Arabic without providing the meaning. You need to generate a list of synonyms in list format. For example: [synonym1, synonym2, synonym3]. another example: [سعيد, مبتهج, فرحان] I need the only in this format."
-        response = self.ollama.generate(model=model, prompt=prompt, system=system_prompt)
-        # Extract the content from the Ollama response
-        synonyms = response['response']
-        print("Response:", synonyms)
+        # Detect the language of the input word
+        language = Detector(word).language.code
 
-        return synonyms
+        if language == "en":
+            print("English word")
+            # Construct the prompt to be sent to the Ollama engine
+            prompt = f"generate {num_synonyms} synonyms for {word} in English in list format without providing the meaning. for example: [synonym1, synonym2, synonym3] I need the results as list format only."
+            system_prompt = "You are a python tool that generates synonyms for English words. You need to generate synonyms for a given word in English without providing the meaning. You need to generate a list of synonyms in list format. For example: [synonym1, synonym2, synonym3]. another example: [happy, joyful, delighted] I need the only in this format."
+            response = self.ollama.generate(model=model, prompt=prompt, system=system_prompt)
+            # Extract the content from the Ollama response
+            synonyms = response['response']
+            if synonyms:
+                return synonyms
+            else:
+                # Return an empty list 
+                return []
+        else:
+            print("Arabic word")
+            # Construct the prompt to be sent to the Ollama engine
+            prompt = f"generate {num_synonyms} synonyms for {word} in Arabic in list format without providing the meaning. for example: [synonym1, synonym2, synonym3] I need the results as list format only."
+            system_prompt = "You are a python tool that generates synonyms for Arabic words. You need to generate synonyms for a given word in Arabic without providing the meaning. You need to generate a list of synonyms in list format. For example: [synonym1, synonym2, synonym3]. another example: [سعيد, مبتهج, فرحان] I need the only in this format."
+            response = self.ollama.generate(model=model, prompt=prompt, system=system_prompt)
+            # Extract the content from the Ollama response
+            synonyms = response['response']
+            if synonyms:
+                return synonyms
+            else:
+                # Return an empty list 
+                return []
 
     def best_synonyms(self, word: str, model: str, embedding_model:str, num_synonyms: int , similarity_threshold: float):
         """
